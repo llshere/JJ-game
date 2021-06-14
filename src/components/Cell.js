@@ -1,21 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { makeStyles, createStyles } from "@material-ui/core";
 import { characterList } from "../characterList";
 
 const useStyles = makeStyles(() =>
   createStyles({
-    img: {
+    cell: {
       width: "50px",
       height: "50px",
+      display: "inline",
+      border: "1px white solid",
     },
   })
 );
 
-export const Cell = (props) => {
+export const Cell = forwardRef((props, ref) => {
   const classes = useStyles();
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
-  const { characterIndex, onClick } = props;
+  const { characterIndex, onClick, clearSelection } = props;
 
   const handleClick = () => {
     setIsSelected(!isSelected);
@@ -29,6 +31,13 @@ export const Cell = (props) => {
     setIsHighlighted(false);
   };
 
+  useEffect(() => {
+    if (clearSelection) {
+      setIsSelected(false);
+      setIsHighlighted(false);
+    }
+  }, [clearSelection]);
+
   const characterImg =
     isHighlighted || isSelected
       ? characterList[characterIndex].highlightImg
@@ -37,12 +46,13 @@ export const Cell = (props) => {
 
   return (
     <img
+      ref={ref}
       src={characterImg}
       alt={characterName}
       onMouseEnter={handleHover}
       onMouseLeave={handleLeave}
       onClick={handleClick}
-      className={classes.img}
+      className={classes.cell}
     />
   );
-};
+});

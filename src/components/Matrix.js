@@ -2,6 +2,7 @@ import { makeStyles, createStyles } from "@material-ui/core";
 import { useState, useEffect, useCallback } from "react";
 import { Cell } from "./Cell";
 import { Line } from "react-lineto";
+import uuid from "react-uuid";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -19,7 +20,6 @@ const useStyles = makeStyles(() =>
       display: "inline",
       border: "1px white solid",
     },
-
     blankCell: {
       width: "50px",
       height: "50px",
@@ -27,7 +27,18 @@ const useStyles = makeStyles(() =>
       border: "1px white solid",
       zIndex: -1,
     },
-    line: {},
+    "@keyframes fadeOut": {
+      "0%": {
+        opacity: 1,
+      },
+      "100%": {
+        opacity: 0,
+      },
+    },
+    line: {
+      opacity: 0,
+      animation: "$fadeOut 1s ease-in-out",
+    },
   })
 );
 
@@ -263,11 +274,14 @@ export default function Matrix() {
 
         if (rr.length !== 0) {
           setGuardMatrix(cleanedM);
-          setPathPoints([
-            [pointA.ri, pointA.ci],
-            ...findPathPoints(rr),
-            [pointB.ri, pointB.ci],
-          ]);
+          setPathPoints({
+            id: uuid(),
+            value: [
+              [pointA.ri, pointA.ci],
+              ...findPathPoints(rr),
+              [pointB.ri, pointB.ci],
+            ],
+          });
         }
       }
 
@@ -309,6 +323,29 @@ export default function Matrix() {
     pointB !== undefined &&
     pointA.value !== pointB.value;
 
+  const lines =
+    pathPoints !== undefined &&
+    pathPoints.value &&
+    pathPoints.value.map((_, index) => {
+      if (index < pathPoints.value.length - 1) {
+        return (
+          <Line
+            className={classes.line}
+            borderColor="red"
+            borderStyle="dotted"
+            borderWidth={5}
+            key={pathPoints.id + index}
+            x0={initPoint[0] + 52 * pathPoints.value[index][1]}
+            y0={initPoint[1] + 52 * pathPoints.value[index][0]}
+            x1={initPoint[0] + 52 * pathPoints.value[index + 1][1]}
+            y1={initPoint[1] + 52 * pathPoints.value[index + 1][0]}
+          />
+        );
+      } else {
+        return <div key={index} />;
+      }
+    });
+
   return (
     <div>
       <div className={classes.matrix}>
@@ -333,26 +370,7 @@ export default function Matrix() {
             )}
           </div>
         ))}
-        {pathPoints !== undefined &&
-          pathPoints.map((_, index) => {
-            if (index < pathPoints.length - 1) {
-              return (
-                <Line
-                  className={classes.line}
-                  borderColor="red"
-                  borderStyle="dotted"
-                  borderWidth={5}
-                  key={index}
-                  x0={initPoint[0] + 52 * pathPoints[index][1]}
-                  y0={initPoint[1] + 52 * pathPoints[index][0]}
-                  x1={initPoint[0] + 52 * pathPoints[index + 1][1]}
-                  y1={initPoint[1] + 52 * pathPoints[index + 1][0]}
-                />
-              );
-            } else {
-              return <div key={index} />;
-            }
-          })}
+        {lines}
       </div>
     </div>
   );

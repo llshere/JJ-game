@@ -1,4 +1,4 @@
-# weather-app
+# Jack Jeanne theme game
 
 Home Page: [https://llshere.github.io/JJ-game/](https://llshere.github.io/JJ-game/).
 
